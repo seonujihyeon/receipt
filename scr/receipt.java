@@ -2,6 +2,7 @@ package dds;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class receipt {
 		
 		
 		ArrayList<OrderListArray> orderlist = new ArrayList<OrderListArray>();
-		InputOrder order = new InputOrder();
+		
 		int count = 0;
 		int total = 0;
 		Scanner scan = new Scanner(System.in); 
@@ -57,10 +58,11 @@ public class receipt {
 		    count = scan.nextInt();
 		    item.count = count;
 		    item.total = item.price * count; 
-		    		
+		    
 		    orderlist.add(item);
 		    
 		    int type;
+		  
 		    
 		    System.out.print("1. 추가구매, 2. 구매종료 : " );
 		    
@@ -77,7 +79,7 @@ public class receipt {
 		  
 		scan.close();
 		
-		
+		}
 		for(int i = 0; i < orderlist.size(); i++) {
 			total += orderlist.get(i).price * orderlist.get(i).count;
 		}
@@ -103,8 +105,26 @@ public class receipt {
 		System.out.println("--------------------------------------------------");
 		System.out.println("      본 영수증은 거래의 참고용으로 사용하시기 바랍니다.");
 		System.out.println("                                                  ");
-		}
-
+		
+		
+		try {
+		Class.forName("com.mysql.cj.jdbc.Driver"); 
+	    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/orderlist", "root", "112023");
+	    String sql = "insert into orderdata(name, unitprice, count, price) values(?, ?, ?, ?)";
+	    PreparedStatement pstmt = conn.prepareStatement(sql);
+	    
+	    for(int i = 0; i < orderlist.size(); i++) {
+	    pstmt.setString(1, orderlist.get(i).name);
+	    pstmt.setInt(2, orderlist.get(i).price);
+	    pstmt.setInt(3, orderlist.get(i).count);
+	    pstmt.setInt(4, orderlist.get(i).total);
+	    pstmt.executeUpdate();
+	    }
+	     
+	     conn.close();
+	} catch(Exception e) {
+			e.printStackTrace();
 	}
+}
 }
 
